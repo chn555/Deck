@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package card_game.v1.deck;
+
+option go_package = "github.com/chn555/internal/gen/proto/card-game/proto/v1";
+
+message Deck {
+  string deck_id = 1;
+}
+
+message Card {
+  enum Suit {
+    SUIT_UNSPECIFIED = 0;
+    SUIT_ACES = 1;
+    SUIT_SPADES = 2;
+    SUIT_DIAMONDS = 3;
+    SUIT_CLUBS = 4;
+    SUIT_JOKERS = 5;
+  }
+
+  Suit suit = 1;
+  int32 value =2;
+}
+
+message FetchCardRequest {
+  Deck deck = 1;
+}
+
+message PushCardRequest {
+  Deck deck = 1;
+  Card card = 2;
+}
+
+message Empty{}
+
+service DeckService {
+  rpc Create(Empty) returns (Deck){}
+
+  rpc FetchCard(FetchCardRequest) returns (Card){}
+
+  rpc PushCard(PushCardRequest) returns (Empty){}
+}
