@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	deckPb "github.com/chn555/deck/internal/gen/proto/deck/v1"
 	"github.com/chn555/deck/pkg/deck"
+	deckPb "github.com/chn555/schemas/proto/deck/v1"
 	"github.com/google/uuid"
 )
 
