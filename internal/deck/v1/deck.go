@@ -21,7 +21,7 @@ func NewDeckServiceServer(store deck.Store) (*DeckServiceServer, error) {
 	return &DeckServiceServer{store: store}, nil
 }
 
-func (s DeckServiceServer) FetchCard(ctx context.Context, request *deckPb.FetchCardRequest) (*deckPb.Card, error) {
+func (s *DeckServiceServer) FetchCard(ctx context.Context, request *deckPb.FetchCardRequest) (*deckPb.Card, error) {
 	d, err := s.store.Get(ctx, request.GetDeck().GetDeckId())
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch deck: %w", err)
@@ -35,7 +35,7 @@ func (s DeckServiceServer) FetchCard(ctx context.Context, request *deckPb.FetchC
 	return cardToProto(card), nil
 }
 
-func (s DeckServiceServer) PushCard(ctx context.Context, request *deckPb.PushCardRequest) (*deckPb.Empty, error) {
+func (s *DeckServiceServer) PushCard(ctx context.Context, request *deckPb.PushCardRequest) (*deckPb.Empty, error) {
 	d, err := s.store.Get(ctx, request.GetDeck().GetDeckId())
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch deck: %w", err)
@@ -45,7 +45,7 @@ func (s DeckServiceServer) PushCard(ctx context.Context, request *deckPb.PushCar
 	return &deckPb.Empty{}, nil
 }
 
-func (s DeckServiceServer) Create(ctx context.Context, _ *deckPb.Empty) (*deckPb.Deck, error) {
+func (s *DeckServiceServer) Create(ctx context.Context, _ *deckPb.Empty) (*deckPb.Deck, error) {
 	newDeck := deck.NewDeck(
 		deck.WithJokersInDeck(2),
 		deck.WithShuffle(true),
