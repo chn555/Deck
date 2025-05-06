@@ -146,3 +146,6 @@ Temporary Items
 *.icloud
 
 # End of https://www.toptal.com/developers/gitignore/api/macos,goland+all,go
+
+# Generated go files from proto
+internal/gen
