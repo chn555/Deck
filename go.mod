@@ -1,4 +1,4 @@
-module github.com/chn555/card-game
+module github.com/chn555/deck
 
 go 1.24.2
 

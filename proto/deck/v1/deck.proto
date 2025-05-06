@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package card_game.v1.deck;
+package deck.v1.deck;
 
-option go_package = "github.com/chn555/internal/gen/proto/card-game/proto/v1";
+option go_package = "github.com/chn555/internal/gen/proto/deck/proto/v1";
 
 message Deck {
   string deck_id = 1;

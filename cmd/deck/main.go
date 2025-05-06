@@ -5,9 +5,9 @@ import (
 	"net"
 	"os"
 
-	deckImpl "github.com/chn555/card-game/internal/card_game/v1"
-	deckPb "github.com/chn555/card-game/internal/gen/proto/card_game/v1"
-	"github.com/chn555/card-game/pkg/deck"
+	deckImpl "github.com/chn555/deck/internal/deck/v1"
+	deckPb "github.com/chn555/deck/internal/gen/proto/deck/v1"
+	"github.com/chn555/deck/pkg/deck"
 	"google.golang.org/grpc"
 )
 

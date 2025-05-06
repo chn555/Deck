@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	deckPb "github.com/chn555/card-game/internal/gen/proto/card_game/v1"
-	"github.com/chn555/card-game/pkg/deck"
+	deckPb "github.com/chn555/deck/internal/gen/proto/deck/v1"
+	"github.com/chn555/deck/pkg/deck"
 	"github.com/google/uuid"
 )
 
@@ -45,7 +45,7 @@ func (s DeckServiceServer) PushCard(ctx context.Context, request *deckPb.PushCar
 	return &deckPb.Empty{}, nil
 }
 
-func (s DeckServiceServer) Create(ctx context.Context, empty *deckPb.Empty) (*deckPb.Deck, error) {
+func (s DeckServiceServer) Create(ctx context.Context, _ *deckPb.Empty) (*deckPb.Deck, error) {
 	newDeck := deck.NewDeck(
 		deck.WithJokersInDeck(2),
 		deck.WithShuffle(true),
