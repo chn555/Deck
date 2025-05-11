@@ -1,5 +1,3 @@
-github.com/chn555/schemas v0.0.0-20250506153851-4da0ac0fc884 h1:YsKztwLCJrD++z7u5OIfu0hvGODpp6D7P12PQUUGM28=
-github.com/chn555/schemas v0.0.0-20250506153851-4da0ac0fc884/go.mod h1:gLCQty4N1cNnq+jK855FEords2f16Xx4lNdBaqtGJ0E=
 github.com/chn555/schemas v0.0.0-20250511120141-81d9e45e33b6 h1:O6/jXOmzr2ecrkQwDDibbx7F8ulFi98L1DTeWEq+Yvo=
 github.com/chn555/schemas v0.0.0-20250511120141-81d9e45e33b6/go.mod h1:gLCQty4N1cNnq+jK855FEords2f16Xx4lNdBaqtGJ0E=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
