@@ -32,6 +32,11 @@ func (s *DeckServiceServer) FetchCard(ctx context.Context, request *deckPb.Fetch
 		return nil, fmt.Errorf("failed to fetch card, deck is empty")
 	}
 
+	err = s.store.Put(ctx, request.GetDeck().GetDeckId(), d)
+	if err != nil {
+		return nil, err
+	}
+
 	return cardToProto(card), nil
 }
 
@@ -42,13 +47,20 @@ func (s *DeckServiceServer) PushCard(ctx context.Context, request *deckPb.PushCa
 	}
 
 	d.PushCard(protoToCard(request.GetCard()))
+
+	err = s.store.Put(ctx, request.GetDeck().GetDeckId(), d)
+	if err != nil {
+		return nil, err
+	}
+
 	return &deckPb.Empty{}, nil
 }
 
-func (s *DeckServiceServer) Create(ctx context.Context, _ *deckPb.Empty) (*deckPb.Deck, error) {
+func (s *DeckServiceServer) Create(ctx context.Context, req *deckPb.CreateDeckRequest) (*deckPb.Deck, error) {
 	newDeck := deck.NewDeck(
-		deck.WithJokersInDeck(2),
-		deck.WithShuffle(true),
+		deck.WithJokersInDeck(int(req.GetJokerCount())),
+		deck.WithShuffle(req.GetShuffle()),
+		deck.WithAdditionalDecks(int(req.AdditionalDeckCount)),
 	)
 	id := uuid.New().String()
 	err := s.store.Put(ctx, id, newDeck)
