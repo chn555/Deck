@@ -1,5 +1,9 @@
 package deck
 
+import (
+	"math/rand"
+)
+
 // Deck represents a deck of cards.
 type Deck struct {
 	// Cards represents the cards in the deck.
@@ -19,6 +23,12 @@ type Config struct {
 	JokerInDeckCount int
 	// ExcludeCardFunc is the function used to exclude cards from the deck.
 	ExcludeCardFunc func(Card) bool
+	// ShuffleDeck indicates whether to shuffle the deck.
+	// If another option was provided that modifies the order of the deck,
+	// the deck will be shuffled before that option is applied.
+	// If AdditionalDecks is not 0, the deck will be shuffled after
+	// the additional decks are added.
+	ShuffleDeck bool
 }
 
 // ConfigOption is a function that modifies the Config struct.
@@ -50,6 +60,17 @@ func WithExclude(exclude func(Card) bool) ConfigOption {
 	}
 }
 
+// WithShuffle indicates whether to shuffle the deck.
+// If another option was provided that modifies the order of the deck,
+// the deck will be shuffled before that option is applied.
+// If AdditionalDecks is not 0, the deck will be shuffled after
+// the additional decks are added.
+func WithShuffle(shuffle bool) ConfigOption {
+	return func(c *Config) {
+		c.ShuffleDeck = shuffle
+	}
+}
+
 // NewDeck creates a new deck with the given options.
 func NewDeck(opts ...ConfigOption) *Deck {
 	cfg := Config{}
@@ -66,7 +87,8 @@ func NewDeck(opts ...ConfigOption) *Deck {
 	deck := newDeckWithCards().
 		addAdditionalDecks(cfg).
 		addJokers(cfg).
-		excludeCards(cfg)
+		excludeCards(cfg).
+		shuffleDeck(cfg)
 
 	return deck
 }
@@ -144,6 +166,22 @@ func (d *Deck) excludeCards(cfg Config) *Deck {
 			// done by appending the slice before the card and the slice after the card.
 			d.Cards = append(d.Cards[:cardIndex], d.Cards[cardIndex+1:]...)
 		}
+	}
+
+	return d
+}
+
+// If WithShuffle is set, the deck is shuffled.
+// This function should be called after the contents of the deck are finalized.
+func (d *Deck) shuffleDeck(cfg Config) *Deck {
+	if cfg.ShuffleDeck {
+		// Using rand.Shuffle here, we provide a function that swaps the cards in the
+		// deck slice
+		rand.Shuffle(len(d.Cards),
+			func(i, j int) {
+				d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
+			},
+		)
 	}
 
 	return d
