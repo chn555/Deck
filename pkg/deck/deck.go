@@ -7,13 +7,56 @@ type Deck struct {
 }
 
 // Config represents the configuration for the deck.
-type Config struct{}
+type Config struct {
+	// AdditionalDecks is the number of decks to create in addition to the base
+	// deck. A base deck is always created, and when AdditionalDecks is 0, only
+	// the base deck is created. If AdditionalDecks is not 0, additional decks
+	// are created and added to the base deck.
+	AdditionalDecks int
+}
+
+// ConfigOption is a function that modifies the Config struct.
+type ConfigOption func(*Config)
+
+// WithAdditionalDecks is the number of decks to create in addition to the base
+// deck. A base deck is always created, and when AdditionalDecks is 0, only
+// the base deck is created. If AdditionalDecks is not 0, additional decks
+// are created and added to the base deck.
+func WithAdditionalDecks(additionalDecks int) ConfigOption {
+	return func(c *Config) {
+		c.AdditionalDecks = additionalDecks
+	}
+}
 
 // NewDeck creates a new deck with the given options.
-func NewDeck() *Deck {
-	deck := newDeckWithCards()
+func NewDeck(opts ...ConfigOption) *Deck {
+	cfg := Config{}
+	for _, o := range opts {
+		o(&cfg)
+	}
+
+	// Create a new deck with the given configuration.
+	// The order of the operations is important:
+	// 1. Create the base deck.
+	// 2. Add additional decks as needed.
+	// 3. Modify the contents of the deck as needed, adding jokers, excluding cards, etc.
+	// 4. Modify the order of the deck as needed, shuffling or sorting. Deterministic sorting should come last.
+	deck := newDeckWithCards().
+		addAdditionalDecks(cfg)
 
 	return deck
+}
+
+// The function addAdditionalDecks creates additional decks as needed. The decks
+// it creates are default decks, with 52 cards each, which are then appended to
+// the base deck.
+func (d *Deck) addAdditionalDecks(c Config) *Deck {
+	for range c.AdditionalDecks {
+		addDeck := newDeckWithCards()
+		d.Cards = append(d.Cards, addDeck.Cards...)
+	}
+
+	return d
 }
 
 // The function newDeckWithCards creates a new deck with default cards.
