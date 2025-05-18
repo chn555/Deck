@@ -2,6 +2,7 @@ package deck
 
 import (
 	"math/rand"
+	"slices"
 )
 
 // Deck represents a deck of cards.
@@ -29,6 +30,12 @@ type Config struct {
 	// If AdditionalDecks is not 0, the deck will be shuffled after
 	// the additional decks are added.
 	ShuffleDeck bool
+	// CmpFunc is the function used to compare cards for sorting the deck.
+	//
+	// CmpFunc(a, b) should return a negative number when a < b, a positive number when
+	// a > b and zero when a == b or a and b are incomparable in the sense of
+	// a strict weak ordering.
+	CmpFunc func(a, b Card) int
 }
 
 // ConfigOption is a function that modifies the Config struct.
@@ -71,6 +78,17 @@ func WithShuffle(shuffle bool) ConfigOption {
 	}
 }
 
+// WithCompareFunc is the function used to compare cards for sorting the deck.
+//
+// CmpFunc(a, b) should return a negative number when a < b, a positive number when
+// a > b and zero when a == b or a and b are incomparable in the sense of
+// a strict weak ordering.
+func WithCompareFunc(cmp func(a, b Card) int) ConfigOption {
+	return func(c *Config) {
+		c.CmpFunc = cmp
+	}
+}
+
 // NewDeck creates a new deck with the given options.
 func NewDeck(opts ...ConfigOption) *Deck {
 	cfg := Config{}
@@ -88,7 +106,8 @@ func NewDeck(opts ...ConfigOption) *Deck {
 		addAdditionalDecks(cfg).
 		addJokers(cfg).
 		excludeCards(cfg).
-		shuffleDeck(cfg)
+		shuffleDeck(cfg).
+		sortDeck(cfg)
 
 	return deck
 }
@@ -182,6 +201,16 @@ func (d *Deck) shuffleDeck(cfg Config) *Deck {
 				d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
 			},
 		)
+	}
+
+	return d
+}
+
+// If WithCompareFunc is set, the deck is sorted using the provided compare function.
+// This function should be called after the contents of the deck are finalized and shuffled.
+func (d *Deck) sortDeck(cfg Config) *Deck {
+	if cfg.CmpFunc != nil {
+		slices.SortStableFunc(d.Cards, cfg.CmpFunc)
 	}
 
 	return d
