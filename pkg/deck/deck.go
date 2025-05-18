@@ -13,6 +13,10 @@ type Config struct {
 	// the base deck is created. If AdditionalDecks is not 0, additional decks
 	// are created and added to the base deck.
 	AdditionalDecks int
+	// JokerInDeckCount is the number of jokers a single deck, by default there are
+	// no jokers in a deck. If AdditionalDecks is used, this will be the numbers
+	// of jokers in each additional deck as well.
+	JokerInDeckCount int
 }
 
 // ConfigOption is a function that modifies the Config struct.
@@ -25,6 +29,15 @@ type ConfigOption func(*Config)
 func WithAdditionalDecks(additionalDecks int) ConfigOption {
 	return func(c *Config) {
 		c.AdditionalDecks = additionalDecks
+	}
+}
+
+// WithJokersInDeck sets the number of jokers a single deck, by default there are
+// no jokers in a deck. If AdditionalDecks is used, this will be the numbers
+// of jokers in each additional deck as well.
+func WithJokersInDeck(jokerCount int) ConfigOption {
+	return func(c *Config) {
+		c.JokerInDeckCount = jokerCount
 	}
 }
 
@@ -42,21 +55,10 @@ func NewDeck(opts ...ConfigOption) *Deck {
 	// 3. Modify the contents of the deck as needed, adding jokers, excluding cards, etc.
 	// 4. Modify the order of the deck as needed, shuffling or sorting. Deterministic sorting should come last.
 	deck := newDeckWithCards().
-		addAdditionalDecks(cfg)
+		addAdditionalDecks(cfg).
+		addJokers(cfg)
 
 	return deck
-}
-
-// The function addAdditionalDecks creates additional decks as needed. The decks
-// it creates are default decks, with 52 cards each, which are then appended to
-// the base deck.
-func (d *Deck) addAdditionalDecks(c Config) *Deck {
-	for range c.AdditionalDecks {
-		addDeck := newDeckWithCards()
-		d.Cards = append(d.Cards, addDeck.Cards...)
-	}
-
-	return d
 }
 
 // The function newDeckWithCards creates a new deck with default cards.
@@ -87,6 +89,36 @@ func newEmptyDeck() *Deck {
 	return &Deck{
 		Cards: make([]Card, 0),
 	}
+}
+
+// The function addAdditionalDecks creates additional decks as needed. The decks
+// it creates are default decks, with 52 cards each, which are then appended to
+// the base deck.
+func (d *Deck) addAdditionalDecks(c Config) *Deck {
+	for range c.AdditionalDecks {
+		addDeck := newDeckWithCards()
+		d.Cards = append(d.Cards, addDeck.Cards...)
+	}
+
+	return d
+}
+
+func (d *Deck) addJokers(cfg Config) *Deck {
+	// We need to create as many jokers as specified in the configuration, for each
+	// deck, so we have the base deck plus however many additional decks are
+	// configured.
+	totalNumberOfDecks := 1 + cfg.AdditionalDecks
+
+	// Multiplying the configured number of jokers by the total number of decks.
+	totalNumberOfJokers := cfg.JokerInDeckCount * totalNumberOfDecks
+
+	// Create as many jokers as we determined are needed.
+	// By default, the decks are created without jokers.
+	for range totalNumberOfJokers {
+		d.Cards = append(d.Cards, NewCard(Jokers, 1))
+	}
+
+	return d
 }
 
 // FetchCard fetches the top card from the deck, once a card has been fetched it
