@@ -17,6 +17,8 @@ type Config struct {
 	// no jokers in a deck. If AdditionalDecks is used, this will be the numbers
 	// of jokers in each additional deck as well.
 	JokerInDeckCount int
+	// ExcludeCardFunc is the function used to exclude cards from the deck.
+	ExcludeCardFunc func(Card) bool
 }
 
 // ConfigOption is a function that modifies the Config struct.
@@ -41,6 +43,13 @@ func WithJokersInDeck(jokerCount int) ConfigOption {
 	}
 }
 
+// WithExclude sets the function to exclude cards from the deck.
+func WithExclude(exclude func(Card) bool) ConfigOption {
+	return func(c *Config) {
+		c.ExcludeCardFunc = exclude
+	}
+}
+
 // NewDeck creates a new deck with the given options.
 func NewDeck(opts ...ConfigOption) *Deck {
 	cfg := Config{}
@@ -56,7 +65,8 @@ func NewDeck(opts ...ConfigOption) *Deck {
 	// 4. Modify the order of the deck as needed, shuffling or sorting. Deterministic sorting should come last.
 	deck := newDeckWithCards().
 		addAdditionalDecks(cfg).
-		addJokers(cfg)
+		addJokers(cfg).
+		excludeCards(cfg)
 
 	return deck
 }
@@ -116,6 +126,24 @@ func (d *Deck) addJokers(cfg Config) *Deck {
 	// By default, the decks are created without jokers.
 	for range totalNumberOfJokers {
 		d.Cards = append(d.Cards, NewCard(Jokers, 1))
+	}
+
+	return d
+}
+
+// The function excludeCards removes cards if WithExclude is set.
+// It should be called before the order is modified.
+func (d *Deck) excludeCards(cfg Config) *Deck {
+	if cfg.ExcludeCardFunc == nil {
+		return d
+	}
+
+	for cardIndex, card := range d.Cards {
+		if cfg.ExcludeCardFunc(card) {
+			// To remove the card, we need to create a new slice without the card. This is
+			// done by appending the slice before the card and the slice after the card.
+			d.Cards = append(d.Cards[:cardIndex], d.Cards[cardIndex+1:]...)
+		}
 	}
 
 	return d
