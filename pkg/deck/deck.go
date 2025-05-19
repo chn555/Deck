@@ -28,3 +28,8 @@ func (d *Deck) FetchCard() (Card, bool) {
 
 	return card, true
 }
+
+// PushCard pushes a card to the bottom of the deck.
+func (d *Deck) PushCard(card Card) {
+	d.Cards = append([]Card{card}, d.Cards...)
+}
